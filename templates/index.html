@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Australian Flights Dashboard</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-50 min-h-screen flex flex-col items-center py-8">
+  <h1 class="text-4xl font-bold mb-10 text-blue-800">Australian Flights Dashboard</h1>
+
+  <!-- Flight Search Section -->
+  <div class="w-full max-w-5xl mb-12">
+    <div class="bg-white rounded-xl shadow-lg p-8 border border-gray-100">
+        <h2 class="text-2xl font-bold text-gray-800 mb-6 text-center">Get Flight Insights</h2>
+        <div class="grid grid-cols-1 md:grid-cols-10 gap-4 items-end">
+            
+            <!-- Origin -->
+            <div class="md:col-span-2">
+                <label for="origin" class="block text-sm font-medium text-gray-700">From</label>
+                <select id="origin" name="origin" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" required>
+                    <option value="">Select Origin</option>
+                    <option value="SYD">Sydney (SYD)</option>
+                    <option value="MEL">Melbourne (MEL)</option>
+                    <option value="BNE">Brisbane (BNE)</option>
+                    <option value="PER">Perth (PER)</option>
+                    <option value="ADL">Adelaide (ADL)</option>
+                    <option value="CBR">Canberra (CBR)</option>
+                    <option value="DRW">Darwin (DRW)</option>
+                    <option value="HBA">Hobart (HBA)</option>
+                    <option value="CNS">Cairns (CNS)</option>
+                    <option value="TSV">Townsville (TSV)</option>
+                    <option value="ROK">Rockhampton (ROK)</option>
+                    <option value="MCY">Sunshine Coast (MCY)</option>
+                    <option value="OOL">Gold Coast (OOL)</option>
+                    <option value="LST">Launceston (LST)</option>
+                    <option value="AVV">Avalon (AVV)</option>
+                </select>
+            </div>
+
+            <!-- Destination -->
+            <div class="md:col-span-2">
+                <label for="destination" class="block text-sm font-medium text-gray-700">To</label>
+                <select id="destination" name="destination" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" required>
+                    <option value="">Select Destination</option>
+                    <option value="SYD">Sydney (SYD)</option>
+                    <option value="MEL">Melbourne (MEL)</option>
+                    <option value="BNE">Brisbane (BNE)</option>
+                    <option value="PER">Perth (PER)</option>
+                    <option value="ADL">Adelaide (ADL)</option>
+                    <option value="CBR">Canberra (CBR)</option>
+                    <option value="DRW">Darwin (DRW)</option>
+                    <option value="HBA">Hobart (HBA)</option>
+                    <option value="CNS">Cairns (CNS)</option>
+                    <option value="TSV">Townsville (TSV)</option>
+                    <option value="ROK">Rockhampton (ROK)</option>
+                    <option value="MCY">Sunshine Coast (MCY)</option>
+                    <option value="OOL">Gold Coast (OOL)</option>
+                    <option value="LST">Launceston (LST)</option>
+                    <option value="AVV">Avalon (AVV)</option>
+                </select>
+            </div>
+
+            <!-- Start Date -->
+            <div class="md:col-span-2">
+                <label for="start" class="block text-sm font-medium text-gray-700">Start</label>
+                <input type="date" id="start" name="start" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" required />
+            </div>
+
+            <!-- End Date -->
+            <div class="md:col-span-2">
+                <label for="end" class="block text-sm font-medium text-gray-700">End</label>
+                <input type="date" id="end" name="end" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" required />
+            </div>
+            
+            <!-- Button -->
+            <div class="md:col-span-2">
+                <button id="searchButton" type="button" class="w-full inline-flex justify-center items-center px-6 py-2 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                    Check
+                </button>
+            </div>
+        </div>
+    </div>
+  </div>
+
+  <!-- Most Popular Routes -->
+  <div class="w-full max-w-6xl mb-12">
+    <h2 class="text-3xl font-bold mb-6 text-purple-700 text-center">Most Popular Routes</h2>
+    <div class="bg-white rounded-lg shadow p-6 overflow-x-auto border border-gray-100">
+      <table class="min-w-full divide-y divide-gray-200" id="popularRoutesTable">
+        <thead class="bg-purple-50">
+          <tr>
+            <th class="px-4 py-2 text-left text-xs font-medium text-purple-700 uppercase tracking-wider">#</th>
+            <th class="px-4 py-2 text-left text-xs font-medium text-purple-700 uppercase tracking-wider">Route</th>
+            <th class="px-4 py-2 text-left text-xs font-medium text-purple-700 uppercase tracking-wider">Action</th>
+          </tr>
+        </thead>
+        <tbody class="bg-white divide-y divide-gray-100"></tbody>
+      </table>
+      <div class="flex justify-end mt-4">
+      </div>
+    </div>
+  </div>
+
+  <!-- Multi-Route Monthly Fares Chart -->
+  <div class="w-full max-w-6xl mb-12">
+    <h2 class="text-3xl font-bold mb-6 text-blue-700 text-center">Cheapest Fares by Month (Top Routes)</h2>
+    <div class="bg-white rounded-lg shadow p-6 border border-gray-100 overflow-x-auto">
+      <div class="min-w-[800px] h-[400px]">
+        <canvas id="monthlyChart"></canvas>
+      </div>
+    </div>
+  </div>
+
+
+  </div>
+
+  <script>
+    // Set date restrictions
+    document.addEventListener('DOMContentLoaded', function() {
+      const startDate = document.getElementById('start');
+      const endDate = document.getElementById('end');
+
+      // Set minimum date to today
+      const today = new Date();
+      const todayString = today.toISOString().split('T')[0];
+      startDate.min = todayString;
+
+      // When start date changes, update end date minimum only
+      startDate.addEventListener('change', function() {
+        if (this.value) {
+          // Set end date minimum to start date (can't return before departure)
+          endDate.min = this.value;
+
+          // Remove maximum date restriction - user can select any future date
+          endDate.removeAttribute('max');
+
+          // Clear end date if it's before the start date
+          if (endDate.value && new Date(endDate.value) < new Date(this.value)) {
+            endDate.value = '';
+          }
+        }
+      });
+
+      // Prevent selecting same origin and destination
+      const origin = document.getElementById('origin');
+      const destination = document.getElementById('destination');
+
+      origin.addEventListener('change', function() {
+        if (this.value && this.value === destination.value) {
+          destination.value = '';
+        }
+      });
+
+      destination.addEventListener('change', function() {
+        if (this.value && this.value === origin.value) {
+          origin.value = '';
+        }
+      });
+    });
+
+    document.getElementById('searchButton').addEventListener('click', function() {
+      const origin = document.getElementById('origin').value;
+      const destination = document.getElementById('destination').value;
+      const start = document.getElementById('start').value;
+      const end = document.getElementById('end').value;
+      
+      // Validation
+      if (!origin || !destination) {
+        alert('Please select both origin and destination airports.');
+        return;
+      }
+
+      if (origin === destination) {
+        alert('Origin and destination cannot be the same.');
+        return;
+      }
+
+      if (!start) {
+        alert('Please select a departure date.');
+        return;
+      }
+
+      if (!end) {
+        alert('Please select a return date.');
+        return;
+      }
+
+      // Check date range
+      const startDate = new Date(start);
+      const endDate = new Date(end);
+      const today = new Date();
+
+      if (startDate < today) {
+        alert('Departure date cannot be in the past.');
+        return;
+      }
+
+      if (endDate <= startDate) {
+        alert('Return date must be after departure date.');
+        return;
+      }
+
+      window.location.href = `/search?origin=${origin}&destination=${destination}&start=${start}&end=${end}`;
+    });
+
+    // Fetch and render popular routes
+    fetch("/api/popular-routes")
+      .then(res => res.json())
+      .then(data => {
+        if (!data || data.length === 0) return;
+        renderPopularRoutesTable(data.slice(0, 20));
+        // auto-load multi-route fares chart for top 10 routes
+        const topRoutes = data.slice(0, 10);
+        loadMultiRouteFares(topRoutes);
+      });
+
+    // Global chart instance
+    let monthlyChartInstance;
+
+    /**
+     * Load and display monthly fares for multiple routes with distinct colors
+     * routes: array of {origin, destination}
+     */
+    function loadMultiRouteFares(routes) {
+      const promises = routes.map(r =>
+        fetch(`/api/monthly/${r.origin}/${r.destination}`)
+          .then(res => res.json())
+          .then(json => ({route: `${r.origin}-${r.destination}`, data: json.data || {}}))
+      );
+      Promise.all(promises).then(results => {
+        // gather all month labels
+        const allMonths = Array.from(new Set(results.flatMap(r => Object.keys(r.data)))).sort();
+        // build datasets
+        const colors = ['#1f77b4','#ff7f0e','#2ca02c','#d62728','#9467bd','#8c564b','#e377c2','#7f7f7f','#bcbd22','#17becf'];
+        const datasets = results.map((r, idx) => ({
+          label: r.route,
+          data: allMonths.map(m => r.data[m] ? r.data[m].price : null),
+          borderColor: colors[idx % colors.length],
+          backgroundColor: colors[idx % colors.length],
+          spanGaps: true
+        }));
+        updateMultiMonthlyChart(allMonths, datasets);
+      });
+    }
+
+    // Replace single-dataset chart update with multi-route chart update
+    function updateMultiMonthlyChart(labels, datasets) {
+      const ctx = document.getElementById('monthlyChart').getContext('2d');
+      if (monthlyChartInstance) {
+        monthlyChartInstance.data.labels = labels;
+        monthlyChartInstance.data.datasets = datasets;
+        monthlyChartInstance.update();
+      } else {
+        monthlyChartInstance = new Chart(ctx, {
+          type: 'bar',
+          data: { labels: labels, datasets: datasets },
+          options: { 
+            plugins: {
+              legend: { position: 'bottom' },
+              tooltip: { enabled: true }
+            },
+            scales: { 
+              x: { title: { display: true, text: 'Month' } }, 
+              y: { title: { display: true, text: 'Price' } } 
+            },
+            responsive: true,
+            maintainAspectRatio: false
+          }
+        });
+      }
+    }
+
+    function renderPopularRoutesTable(data) {
+      const tbody = document.querySelector("#popularRoutesTable tbody");
+      tbody.innerHTML = '';
+      data.slice(0, 10).forEach((route, i) => { // Show only top 10 routes
+        const row = `<tr class='hover:bg-purple-50 cursor-pointer transition' data-origin='${route.origin}' data-destination='${route.destination}'>
+          <td class='px-4 py-2'>${i + 1}</td>
+          <td class='px-4 py-2 font-medium text-blue-600 hover:text-blue-800'>${route.origin} → ${route.destination}</td>
+          <td class='px-4 py-2'>
+            <span class='font-semibold text-purple-700 hover:bg-purple-700 hover:text-white px-2 py-1 rounded transition'>
+              View
+            </span>
+          </td>
+        </tr>`;
+        tbody.insertAdjacentHTML('beforeend', row);
+      });
+      // Attach click handler to navigate to route details
+      document.querySelectorAll('#popularRoutesTable tbody tr').forEach(tr => {
+        tr.addEventListener('click', () => {
+          const org = tr.getAttribute('data-origin');
+          const dst = tr.getAttribute('data-destination');
+          window.location.href = `/route/${org}/${dst}`;
+        });
+      });
+    }
+  </script>
+</body>
+</html>

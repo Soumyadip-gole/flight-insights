@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Flight Search: {{ origin }} to {{ destination }}</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
+</head>
+<body class="bg-gray-50 min-h-screen">
+  <!-- Header -->
+  <div class="bg-white shadow-sm border-b">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+      <div class="flex items-center justify-between">
+        <div>
+          <a href="/" class="text-blue-600 hover:text-blue-800 text-sm mb-2 inline-block">Back to Dashboard</a>
+          <h1 class="text-3xl font-bold text-gray-900">{{ origin }} → {{ destination }}</h1>
+          <p class="text-gray-600 mt-1">Showing results for <span class="font-semibold">{{ start }}</span> to <span class="font-semibold">{{ end }}</span></p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Loading or Error State -->
+  <div id="status" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div class="text-center">
+      <div id="spinner" class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+      <p id="status-text" class="mt-2 text-gray-600">Searching for flights...</p>
+    </div>
+  </div>
+
+  <!-- Main Content -->
+  <div id="content" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 hidden">
+
+    <!-- Key Metrics Cards -->
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+      <div class="bg-white rounded-lg shadow p-6 border border-gray-100 hover:shadow-lg transition">
+        <div class="text-sm font-medium text-gray-500 uppercase tracking-wide">Cheapest Flight</div>
+        <div class="mt-2 text-3xl font-bold text-green-600" id="cheapestPrice">-</div>
+        <div class="text-sm text-gray-600 mt-1" id="cheapestDate"></div>
+      </div>
+
+      <div class="bg-white rounded-lg shadow p-6 border border-gray-100 hover:shadow-lg transition">
+        <div class="text-sm font-medium text-gray-500 uppercase tracking-wide">Average Price</div>
+        <div class="mt-2 text-3xl font-bold text-purple-600" id="avgPrice">-</div>
+        <div class="text-sm text-gray-600 mt-1">Volatility: <span id="priceVolatility">-</span></div>
+      </div>
+
+      <div class="bg-white rounded-lg shadow p-6 border border-gray-100 hover:shadow-lg transition">
+        <div class="text-sm font-medium text-gray-500 uppercase tracking-wide">Direct Flights</div>
+        <div class="mt-2 text-3xl font-bold text-blue-600" id="directFlights">-</div>
+        <div class="text-sm text-gray-600 mt-1" id="directPercentage">-% of total</div>
+      </div>
+
+      <div class="bg-white rounded-lg shadow p-6 border border-gray-100 hover:shadow-lg transition">
+        <div class="text-sm font-medium text-gray-500 uppercase tracking-wide">Avoid This Month</div>
+        <div class="mt-2 text-3xl font-bold text-red-600" id="worstPrice">-</div>
+        <div class="text-sm text-gray-600 mt-1" id="worstDate"></div>
+      </div>
+    </div>
+
+    <!-- AI Insights Section -->
+    <div id="aiInsights" class="bg-gradient-to-r from-purple-50 to-blue-50 rounded-lg shadow p-6 mb-8 border border-purple-200 hidden">
+        <div class="flex items-center mb-4">
+            <div class="bg-purple-100 rounded-full p-2 mr-3">
+                <svg class="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path>
+                </svg>
+            </div>
+            <h3 class="text-xl font-semibold text-gray-900">🤖 AI-Powered Travel Insights</h3>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <!-- Summary Card -->
+            <div class="bg-white rounded-lg p-4 border border-purple-100">
+                <h4 class="font-semibold text-purple-800 mb-2">📊 Route Summary</h4>
+                <p class="text-gray-700 text-sm" id="aiSummary">Loading insights...</p>
+            </div>
+
+            <!-- Price Prediction Card -->
+            <div class="bg-white rounded-lg p-4 border border-blue-100">
+                <h4 class="font-semibold text-blue-800 mb-2">📈 Price Prediction</h4>
+                <p class="text-gray-700 text-sm" id="aiPrediction">Analyzing trends...</p>
+            </div>
+
+            <!-- Booking Tip Card -->
+            <div class="bg-white rounded-lg p-4 border border-green-100">
+                <h4 class="font-semibold text-green-800 mb-2">💡 Booking Strategy</h4>
+                <p class="text-gray-700 text-sm" id="aiBookingTip">Calculating optimal timing...</p>
+            </div>
+
+            <!-- Travel Recommendations Card -->
+            <div class="bg-white rounded-lg p-4 border border-orange-100">
+                <h4 class="font-semibold text-orange-800 mb-2">✈️ Travel Tips</h4>
+                <p class="text-gray-700 text-sm" id="aiRecommendations">Preparing recommendations...</p>
+            </div>
+        </div>
+
+        <div class="mt-4 text-xs text-gray-500 flex items-center">
+            <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                <path d="M10 12a2 2 0 100-4 2 2 0 000 4z"/>
+                <path fill-rule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clip-rule="evenodd"/>
+            </svg>
+            Insights powered by Google Gemini AI - Based on current flight data analysis
+        </div>
+    </div>
+
+    <!-- Price Fluctuation Chart -->
+    <div class="bg-white rounded-lg shadow p-6 mb-8 border border-gray-100">
+        <h3 class="text-xl font-semibold text-gray-900 mb-4">Price Trend</h3>
+        <div class="h-[350px]">
+          <canvas id="priceChart"></canvas>
+        </div>
+    </div>
+
+    <!-- Direct vs Non-Direct Comparison -->
+    <div id="directComparison" class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+      <div class="bg-white rounded-lg shadow p-6 border border-gray-100">
+        <div class="text-sm font-medium text-gray-500 uppercase tracking-wide">Direct Flights Avg Price</div>
+        <div class="mt-2 text-3xl font-bold text-blue-600" id="directAvg">-</div>
+      </div>
+      <div class="bg-white rounded-lg shadow p-6 border border-gray-100">
+        <div class="text-sm font-medium text-gray-500 uppercase tracking-wide">Non-Direct Flights Avg Price</div>
+        <div class="mt-2 text-3xl font-bold text-red-600" id="indirectAvg">-</div>
+      </div>
+    </div>
+
+    <!-- Detailed Flights Table -->
+    <div class="bg-white rounded-lg shadow p-6 border border-gray-100">
+        <h3 class="text-xl font-semibold text-gray-900 mb-4">Best Booking Sites</h3>
+        <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200" id="flightsTable">
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Booking Site</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Price (AUD)</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Times Seen</th>
+                    </tr>
+                </thead>
+                <tbody class="bg-white divide-y divide-gray-200">
+                    <!-- Flight data will be populated here -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+  </div>
+
+  <script>
+    const origin = '{{ origin }}';
+    const destination = '{{ destination }}';
+    const startDate = '{{ start }}';
+    const endDate = '{{ end }}';
+
+    function fetchAndRender() {
+      document.getElementById('status').classList.remove('hidden');
+      document.getElementById('content').classList.add('hidden');
+
+      let url = `/api/route/${origin}/${destination}`;
+      const params = new URLSearchParams();
+      if (startDate) params.append('start_date', startDate);
+      if (endDate) params.append('end_date', endDate);
+      if (params.toString()) url += `?${params.toString()}`;
+
+      fetch(url)
+        .then(res => res.json())
+        .then(data => {
+          if (data.error) {
+            document.getElementById('spinner').style.display = 'none';
+            document.getElementById('status-text').textContent = data.error;
+            return;
+          }
+          document.getElementById('status').classList.add('hidden');
+          document.getElementById('content').classList.remove('hidden');
+          render(data);
+        })
+        .catch(error => {
+          console.error('Error fetching analytics data:', error);
+          document.getElementById('spinner').style.display = 'none';
+          document.getElementById('status-text').textContent = 'An unexpected error occurred.';
+        });
+    }
+
+    fetchAndRender();
+
+    let priceChartInstance;
+
+    function render(analytics) {
+      // Key Metrics from analytics
+      document.getElementById('avgPrice').textContent = `$${analytics.price_analysis.avg_price.toFixed(0)}`;
+      document.getElementById('priceVolatility').textContent = `$${analytics.price_analysis.price_volatility.toFixed(2)}`;
+      document.getElementById('cheapestPrice').textContent = `$${analytics.price_analysis.min_price}`;
+      document.getElementById('cheapestDate').textContent = analytics.timing_analysis.best_month;
+      document.getElementById('directFlights').textContent = `${analytics.price_analysis.flight_breakdown.direct_flights}`;
+      document.getElementById('directPercentage').textContent = `${analytics.price_analysis.flight_breakdown.direct_percentage.toFixed(1)}% of total`;
+      document.getElementById('worstPrice').textContent = `$${analytics.timing_analysis.worst_month_price.toFixed(0)}`;
+      document.getElementById('worstDate').textContent = analytics.timing_analysis.worst_month;
+
+      // Price Fluctuation Chart using analytics data
+      const ctx = document.getElementById('priceChart').getContext('2d');
+      if (priceChartInstance) {
+        priceChartInstance.destroy();
+      }
+
+      priceChartInstance = new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: analytics.price_fluctuation_chart.labels,
+          datasets: [
+            {
+              label: 'Average Price (AUD)',
+              data: analytics.price_fluctuation_chart.data,
+              borderColor: 'rgb(59, 130, 246)',
+              backgroundColor: 'rgba(59, 130, 246, 0.1)',
+              fill: true,
+              tension: 0.2,
+              borderWidth: 3
+            },
+            {
+              label: 'Trend Line',
+              data: analytics.price_fluctuation_chart.trend_data,
+              borderColor: 'rgb(239, 68, 68)',
+              backgroundColor: 'rgba(239, 68, 68, 0.05)',
+              borderDash: [5, 5],
+              fill: false,
+              tension: 0.2,
+              borderWidth: 2
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          scales: {
+            x: {
+              type: 'time',
+              time: { unit: 'month', parser: 'yyyy-MM', displayFormats: { month: 'MMM yyyy' }},
+              title: { display: true, text: 'Month' }
+            },
+            y: { beginAtZero: true, title: { display: true, text: 'Price (AUD)' }}
+          },
+          plugins: {
+            legend: {
+              display: true,
+              position: 'top'
+            },
+            title: {
+              display: true,
+              text: `Price Trend: ${analytics.price_fluctuation_chart.trend_text}`
+            }
+          }
+        }
+      });
+
+      // Direct vs Non-Direct Flights Average Price
+      document.getElementById('directAvg').textContent = `$${analytics.price_analysis.direct_avg_price.toFixed(0)}`;
+      document.getElementById('indirectAvg').textContent = analytics.price_analysis.indirect_avg_price > 0 ?
+        `$${analytics.price_analysis.indirect_avg_price.toFixed(0)}` : 'N/A';
+
+      // Update the table to show comprehensive flight analysis
+      const tableBody = document.querySelector("#flightsTable tbody");
+      const breakdown = analytics.price_analysis.flight_breakdown;
+
+      tableBody.innerHTML = `
+        <tr class="hover:bg-gray-50">
+          <td class="px-6 py-4 font-semibold">Direct Flights</td>
+          <td class="px-6 py-4 font-semibold text-blue-600">$${analytics.price_analysis.direct_avg_price.toFixed(0)}</td>
+          <td class="px-6 py-4">${breakdown.direct_flights} flights (${breakdown.direct_percentage.toFixed(1)}%)</td>
+        </tr>
+        ${breakdown.connecting_flights > 0 ? `
+        <tr class="hover:bg-gray-50">
+          <td class="px-6 py-4 font-semibold">Connecting Flights</td>
+          <td class="px-6 py-4 font-semibold text-red-600">$${analytics.price_analysis.indirect_avg_price.toFixed(0)}</td>
+          <td class="px-6 py-4">${breakdown.connecting_flights} flights (${breakdown.connecting_percentage.toFixed(1)}%)</td>
+        </tr>
+        ` : ''}
+        <tr class="hover:bg-gray-50 bg-gray-50">
+          <td class="px-6 py-4 font-bold">Total Analyzed</td>
+          <td class="px-6 py-4 font-bold">$${analytics.price_analysis.avg_price.toFixed(0)}</td>
+          <td class="px-6 py-4 font-bold">${analytics.total_flights_analyzed} flights</td>
+        </tr>
+        <tr class="hover:bg-gray-50">
+          <td class="px-6 py-4">Cheapest Month</td>
+          <td class="px-6 py-4 text-green-600 font-semibold">$${analytics.timing_analysis.best_month_price.toFixed(0)}</td>
+          <td class="px-6 py-4">${analytics.timing_analysis.best_month}</td>
+        </tr>
+        <tr class="hover:bg-gray-50">
+          <td class="px-6 py-4">Most Expensive Month</td>
+          <td class="px-6 py-4 text-red-600 font-semibold">$${analytics.timing_analysis.worst_month_price.toFixed(0)}</td>
+          <td class="px-6 py-4">${analytics.timing_analysis.worst_month}</td>
+        </tr>
+        <tr class="hover:bg-gray-50">
+          <td class="px-6 py-4">Price Range</td>
+          <td class="px-6 py-4 font-semibold">$${analytics.price_analysis.min_price} - $${analytics.price_analysis.max_price}</td>
+          <td class="px-6 py-4">Volatility: $${analytics.price_analysis.price_volatility.toFixed(2)}</td>
+        </tr>
+      `;
+
+      // AI Insights Rendering - Use all actual data from API
+      if (analytics.ai_insights) {
+        document.getElementById('aiSummary').textContent = analytics.ai_insights.summary;
+        document.getElementById('aiPrediction').textContent = analytics.ai_insights.price_prediction;
+        document.getElementById('aiBookingTip').textContent = analytics.ai_insights.booking_tip;
+        document.getElementById('aiRecommendations').textContent = analytics.ai_insights.travel_recommendations;
+
+        // Show the AI insights section
+        document.getElementById('aiInsights').classList.remove('hidden');
+      } else {
+        // Fallback if AI insights are not available
+        document.getElementById('aiSummary').textContent = `Route from ${origin} to ${destination} analyzed with ${analytics.total_flights_analyzed} flights. Price volatility: $${analytics.price_analysis.price_volatility.toFixed(2)}`;
+        document.getElementById('aiPrediction').textContent = analytics.price_fluctuation_chart.trend_text || 'Price trend data unavailable';
+        document.getElementById('aiBookingTip').textContent = `Best booking period: ${analytics.timing_analysis.best_month} ($${analytics.timing_analysis.best_month_price}). Avoid: ${analytics.timing_analysis.worst_month} ($${analytics.timing_analysis.worst_month_price})`;
+        document.getElementById('aiRecommendations').textContent = `${analytics.price_analysis.flight_breakdown.direct_percentage.toFixed(1)}% direct flights available. Price range: $${analytics.price_analysis.min_price} - $${analytics.price_analysis.max_price}`;
+
+        // Show the AI insights section
+        document.getElementById('aiInsights').classList.remove('hidden');
+      }
+    }
+  </script>
+</body>
+</html>
