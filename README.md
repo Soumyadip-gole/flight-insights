@@ -10,19 +10,28 @@ To run Flight Insights locally, follow these steps:
    cd flight-insights
    ```
 
-2. **Create and activate a virtual environment (recommended):**
-   ```bash
-   python3 -m venv venv
-   source venv/bin/activate  # On Windows use: venv\Scripts\activate
-   ```
-
-3. **Install dependencies:**
+2. **Install dependencies:**
    ```bash
    pip install -r requirements.txt
    ```
 
-4. **Set up environment variables (if required):**
-   - Copy `.env.example` to `.env` and fill in any necessary credentials or API keys.
+3. **Set up environment variables:**
+
+   Create a `.env` file in the project root and add the following keys:
+
+   ```env
+   # Required for flight data and analytics
+   TRAVELPAYOUTS_API_TOKEN=your_travelpayouts_api_token_here
+
+   # Required for AI-powered insights (Gemini/Google AI)
+   GEMINI_API_KEY=your_gemini_api_key_here
+   ```
+
+   - Replace `your_travelpayouts_api_token_here` with your actual Travelpayouts API token.
+   - Replace `your_gemini_api_key_here` with your actual Gemini API key.
+   - **Both keys are mandatory** for full functionality (flight analytics and AI insights).
+
+   If you do not have these credentials, please sign up at [Travelpayouts](https://www.travelpayouts.com/) and [Google AI/Gemini](https://ai.google.dev/) to retrieve your API tokens.
 
 5. **Run the application:**
    ```bash
@@ -32,13 +41,6 @@ To run Flight Insights locally, follow these steps:
 
 6. **Access in your browser:**
    - Navigate to `http://localhost:5000` to use Flight Insights locally.
-
-> **Note:** If the project uses Docker, you can alternatively run:
-> ```bash
-> docker build -t flight-insights .
-> docker run -p 5000:5000 flight-insights
-> ```
-> and access via your browser as above.
 
 ---
 
