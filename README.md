@@ -1,6 +1,44 @@
 # Flight Insights
 
-Flight Insights is an advanced web application for analyzing flight price trends, discovering popular routes, and receiving AI-powered travel insights. The platform is designed to help travelers make informed decisions by providing comprehensive analytics on airfare data across different routes and time periods.
+## Setup Instructions
+
+To run Flight Insights locally, follow these steps:
+
+1. **Clone the repository:**
+   ```bash
+   git clone https://github.com/Soumyadip-gole/flight-insights.git
+   cd flight-insights
+   ```
+
+2. **Create and activate a virtual environment (recommended):**
+   ```bash
+   python3 -m venv venv
+   source venv/bin/activate  # On Windows use: venv\Scripts\activate
+   ```
+
+3. **Install dependencies:**
+   ```bash
+   pip install -r requirements.txt
+   ```
+
+4. **Set up environment variables (if required):**
+   - Copy `.env.example` to `.env` and fill in any necessary credentials or API keys.
+
+5. **Run the application:**
+   ```bash
+   python app.py
+   ```
+   - The app will typically start on `http://localhost:5000` or the port configured in your environment.
+
+6. **Access in your browser:**
+   - Navigate to `http://localhost:5000` to use Flight Insights locally.
+
+> **Note:** If the project uses Docker, you can alternatively run:
+> ```bash
+> docker build -t flight-insights .
+> docker run -p 5000:5000 flight-insights
+> ```
+> and access via your browser as above.
 
 ---
 
