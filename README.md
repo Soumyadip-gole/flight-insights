@@ -44,6 +44,19 @@ To run Flight Insights locally, follow these steps:
 
 ---
 
+## Screenshots
+
+Below are sample screenshots from the application (located in the `assets` directory):
+
+![Screenshot 1](assets/1.png)
+![Screenshot 2](assets/2.png)
+![Screenshot 3](assets/3.png)
+![Screenshot 4](assets/4.png)
+![Screenshot 5](assets/5.png)
+![Screenshot 6](assets/6.png)
+
+---
+
 ## Table of Contents
 
 - [Features](#features)
